@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:simple_investment/theme.dart';
 
 class StyledText extends StatelessWidget {
   const StyledText({super.key, required this.text});
@@ -35,6 +34,7 @@ class StyledTitle extends StatelessWidget {
 class StyledHeading extends StatelessWidget {
   const StyledHeading({super.key, required this.text});
   final String text;
+  String getText() => text;
 
   @override
   Widget build(BuildContext context) {

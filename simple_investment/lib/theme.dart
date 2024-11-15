@@ -47,9 +47,17 @@ ThemeData primeTheme = ThemeData(
 
   inputDecorationTheme: InputDecorationTheme(
     filled: true,
-    fillColor: AppColors.secondaryColor.withOpacity(0.5),
+    fillColor: AppColors.focusColor,
     border: InputBorder.none,
-    labelStyle: TextStyle(color: AppColors.textColor),
+    labelStyle: TextStyle(color: AppColors.textColor.withOpacity(0.2)),
     prefixIconColor: AppColors.textColor,
+    hintStyle: TextStyle(
+      color: AppColors.textColor.withOpacity(0.5)
+    )
+  ),
+  elevatedButtonTheme: ElevatedButtonThemeData(
+    style: ButtonStyle(
+      backgroundColor: MaterialStatePropertyAll(AppColors.focusColor),
+    )
   )
 );

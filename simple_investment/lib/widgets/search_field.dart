@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:simple_investment/share/styled_text.dart';
 import 'package:simple_investment/theme.dart';
 
 class SearchField extends StatefulWidget {
@@ -25,8 +24,9 @@ class _SearchFieldState extends State<SearchField> {
         textStyle: Theme.of(context).textTheme.bodyMedium
       ),
       decoration: InputDecoration(
-        label: StyledHeading(text: widget.text),
+        hintText: widget.text,
         focusColor: AppColors.focusColor,
+        prefixIcon: const Icon(Icons.search),
         suffixIcon: IconButton(
           onPressed: clearText,
           icon: Icon(Icons.clear, color: AppColors.textColor, size: 15,)
