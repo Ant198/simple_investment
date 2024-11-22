@@ -16,6 +16,14 @@ class StickerPrice extends StatelessWidget {
     print('$res + $firstQuart + $secondQuart + $thirdQuart + $fourthQuart');
     return res;
   }
+
+  double getRoic() {
+    double netIncome = double.parse(data.incomeStateent["annualReports"][0]["netIncome"]);
+    double totalDebt = double.parse(data.balanceSheet["annualReports"][0]["longTermDebtNoncurrent"])
+                    + double.parse(data.balanceSheet["annualReports"][0]["shortTermDebt"]);
+    double equity = double.parse(data.balanceSheet["annualReports"][0]["totalAssets"])
+                  - double.parse(data.balanceSheet["annualReports"][0]["totalLiabilities"]);
+  }
   @override
   Widget build(BuildContext context) {
     return Result(earnings: getTrailingEps());
