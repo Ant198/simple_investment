@@ -9,7 +9,7 @@ class CompanyDataProvider extends ChangeNotifier {
   late Map<String, dynamic> _cashFlow = {};
 
   Map<String, dynamic> get ePSStore => _ePSStore;
-  Map<String, dynamic> get incomeStateent => _incomeStatement;
+  Map<String, dynamic> get incomeStatement => _incomeStatement;
   Map<String, dynamic> get balanceSheet => _balanceSheet;
   Map<String, dynamic> get cashFlow => _cashFlow;
 

@@ -32,6 +32,9 @@ class _HomeState extends State<Home> {
       );
     }
     await saveData.fetchEarnings(_searchCompany.text);
+    await saveData.fetchIncomeStatement(_searchCompany.text);
+    await saveData.fetchBalanceSheet(_searchCompany.text);
+    await saveData.fetchCashFlow(_searchCompany);
   }
 
   @override
@@ -44,7 +47,7 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     var provider = Provider.of<CompanyDataProvider>(context, listen: false);
     return Scaffold(
-      appBar: AppBar(
+      appBar: AppBar(eps[i] = value;
         title: const StyledTitle(text: 'Simple Investment',),
       ),
       body: SingleChildScrollView(
@@ -71,11 +74,17 @@ class _HomeState extends State<Home> {
                 ],
               ),
               Consumer<CompanyDataProvider>(
-                builder: (context, inputItem, child) {
-                  if (inputItem.ePSStore.isEmpty) {
+                builder: (context, item, child) {
+                  if (item.ePSStore.isEmpty) {
                     return const Text('company');
                   } else {
-                    return StickerPrice(data: inputItem,);
+                    return StickerPrice(
+                      incomeStatement: item.incomeStatement["annualReports"],
+                      balanceSheet: item.balanceSheet["annualReports"],
+                      cashFlow: item.cashFlow["annualReports"],
+                      epsAnnual: item.ePSStore["annualReports"],
+                      epsQaurt: item.ePSStore['quarterlyEarnings'],
+                    );
                   }
                 }
               ),
