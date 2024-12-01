@@ -10,11 +10,12 @@ class StickerPrice extends StatelessWidget {
     required this.epsQuart,
     super.key});
 
-  final List<Map<String, dynamic>> incomeStatement;
-  final List<Map<String, dynamic>> balanceSheet;
-  final List<Map<String, dynamic>> cashFlow;
-  final List<Map<String, dynamic>> epsAnnual;
-  final List<Map<String, dynamic>> epsQuart;
+  final List<dynamic> incomeStatement;
+  final List<dynamic> balanceSheet;
+  final List<dynamic> cashFlow;
+  final List<dynamic> epsAnnual;
+  final List<dynamic> epsQuart;
+
 
   double getTrailingEps() {
     double fourthQuart = double.parse(epsQuart[0]['reportedEPS']);
@@ -27,17 +28,22 @@ class StickerPrice extends StatelessWidget {
     return res;
   }
 
-  double getRoic() {
-    List <double> listOfRoic = [];
-
-    double netIncome = double.parse(data.incomeStatement["annualReports"][0]["netIncome"]);
-    double totalDebt = double.parse(data.balanceSheet["annualReports"][0]["longTermDebtNoncurrent"])
-                    + double.parse(data.balanceSheet["annualReports"][0]["shortTermDebt"]);
-    double equity = double.parse(data.balanceSheet["annualReports"][0]["totalAssets"])
-                  - double.parse(data.balanceSheet["annualReports"][0]["totalLiabilities"]);
-    return netIncome / (totalDebt + equity);
+  List<double> getListOfRoic() {
+    print('Im in ROIC');
+    List<double> listOfRoic = [];
+    int years = 10;
+    for (int i = 0; i < years; i++) {
+      num netIncome = num.parse(incomeStatement[i]["netIncome"]);
+      num totalDebt = num.parse(balanceSheet[i]["longTermDebtNoncurrent"])
+                       + num.parse(balanceSheet[i]["shortTermDebt"]);
+      num equity = num.parse(balanceSheet[i]["totalAssets"])
+                    - num.parse(balanceSheet[i]["totalLiabilities"]);
+      listOfRoic.add(double.parse((netIncome / (totalDebt + equity) * 100).toStringAsFixed(2)));
+    }
+    print('stage - 5 $listOfRoic');
+    return listOfRoic;
   }
-
+/*
   double getSaleGrowthRate() {
     double currentSale = double.parse(data.incomeStatement["annualReports"][0]["totalRevenue"]);
     double initialSale = double.parse(data.incomeStatement["annualReports"][1]["totalRevenue"]);
@@ -67,10 +73,11 @@ class StickerPrice extends StatelessWidget {
     double cashFlow = (currentCashFlow - initialCashFlow) / initialCashFlow * 100;
     return cashFlow;
   }
-
+*/
 
   @override
   Widget build(BuildContext context) {
-    return Result(earnings: getTrailingEps());
+    print('stage - 3');
+    return Result(earnings: getTrailingEps(), roic: getListOfRoic(),);
   }
 }

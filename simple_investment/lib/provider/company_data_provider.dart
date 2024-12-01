@@ -13,6 +13,46 @@ class CompanyDataProvider extends ChangeNotifier {
   Map<String, dynamic> get balanceSheet => _balanceSheet;
   Map<String, dynamic> get cashFlow => _cashFlow;
 
+  Future<void> fetchCompanyData(String ticker) async {
+    String apiKey = 'XSEM76YOZ2K24533';
+    String symbol = ticker;
+    String urlEarnings = 'https://www.alphavantage.co/query?function=EARNINGS&symbol=$symbol&apikey=$apiKey';
+    String urlIncomeStatement = 'https://www.alphavantage.co/query?function=INCOME_STATEMENT&symbol=$symbol&apikey=$apiKey';
+    String urlBalanceSheet = 'https://www.alphavantage.co/query?function=BALANCE_SHEET&symbol=$symbol&apikey=$apiKey';
+    String urlCashFlow = 'https://www.alphavantage.co/query?function=CASH_FLOW&symbol=$symbol&apikey=$apiKey';
+    
+    final responses = await Future.wait([
+      http.get(Uri.parse(urlEarnings)),
+      http.get(Uri.parse(urlIncomeStatement)),
+      http.get(Uri.parse(urlBalanceSheet)),
+      http.get(Uri.parse(urlCashFlow)),
+    ]);
+
+    for (var response in responses) {
+      if(response.statusCode == 200) {
+        if(_ePSStore.isEmpty) {
+          _ePSStore = convert.jsonDecode(response.body);
+          notifyListeners();
+          continue;
+        } else if(_incomeStatement.isEmpty) {
+          _incomeStatement = convert.jsonDecode(response.body);
+          notifyListeners();
+          continue;
+        } else if(_balanceSheet.isEmpty) {
+          _balanceSheet = convert.jsonDecode(response.body);
+          notifyListeners();
+          continue;
+        } else {
+          _cashFlow = convert.jsonDecode(response.body);
+          notifyListeners();
+        }
+      } else {
+        print('error hello');
+      }
+    }
+  }
+
+/*
   Future<void> fetchEarnings(String ticker) async {
     String apiKey = 'XSEM76YOZ2K24533';
     String symbol = ticker;
@@ -60,6 +100,9 @@ class CompanyDataProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  */
+  
 }
   /*
    fcf = operatingCashFlow - caEx
