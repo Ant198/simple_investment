@@ -29,7 +29,6 @@ class StickerPrice extends StatelessWidget {
   }
 
   List<double> getListOfRoic() {
-    print('Im in ROIC');
     List<double> listOfRoic = [];
     int years = 10;
     for (int i = 0; i < years; i++) {
@@ -40,44 +39,81 @@ class StickerPrice extends StatelessWidget {
                     - num.parse(balanceSheet[i]["totalLiabilities"]);
       listOfRoic.add(double.parse((netIncome / (totalDebt + equity) * 100).toStringAsFixed(2)));
     }
-    print('stage - 5 $listOfRoic');
     return listOfRoic;
   }
-/*
-  double getSaleGrowthRate() {
-    double currentSale = double.parse(data.incomeStatement["annualReports"][0]["totalRevenue"]);
-    double initialSale = double.parse(data.incomeStatement["annualReports"][1]["totalRevenue"]);
-    double saleGrothRate = (currentSale - initialSale) / initialSale * 100;
+
+  List<double> getSaleGrowthRate() {
+    List<double> saleGrothRate = [];
+    double currentSale;
+    double initialSale;
+    int count = 9;
+    for (int i = 0; i < count; i++) {
+      currentSale = double.parse(incomeStatement[i]["totalRevenue"]);
+      initialSale = double.parse(incomeStatement[i + 1]["totalRevenue"]);
+      saleGrothRate.add(double.parse(((currentSale - initialSale) / initialSale * 100).toStringAsFixed(2)));
+    }
+    
     return saleGrothRate;
   }
 
-  double getEpsGrowthRate() {
-    double currentEps = getTrailingEps();
-    double initialEps = double.parse(data.ePSStore["annualEarnings"][1]["reportedEPS"]);
-    double epsGrothRate = (currentEps - initialEps) / initialEps * 100;
-    return epsGrothRate;
+  List<double> getEpsGrowthRate() {
+    List<double> epsGrowthRate = [];
+    int count = 9;
+    double currentEps;
+    double initialEps;
+    for (int i = 0; i < count; i++) {
+      if(i == 0) {
+        currentEps = getTrailingEps();
+      } else {
+        currentEps = double.parse(epsAnnual[i]["reportedEPS"]);
+      }
+      initialEps = double.parse(epsAnnual[i + 1]["reportedEPS"]);
+      epsGrowthRate.add(double.parse(((currentEps - initialEps) / initialEps * 100).toStringAsFixed(2)));
+    }
+    return epsGrowthRate;
   }
 
-  double getEquityGrowthRate() {
-    double currentEquity = double.parse(data.balanceSheet["annualReports"][0]["totalAssets"])
-                         - double.parse(data.balanceSheet["annualReports"][0]["totalLiabilities"]);
-    double initialEquity = double.parse(data.balanceSheet["annualReports"][1]["totalAssets"])
-                         - double.parse(data.balanceSheet["annualReports"][1]["totalLiabilities"]);
-    double equityGrothRate = (currentEquity - initialEquity) / initialEquity * 100;
-    return equityGrothRate;
+  List<double> getEquityGrowthRate() {
+    List<double> equityGrowthRate = [];
+    int count = 9;
+    double currentEquity;
+    double initialEquity;
+    for (int i = 0; i < count; i++) {
+      currentEquity = double.parse(balanceSheet[i]["totalAssets"])
+                    - double.parse(balanceSheet[i]["totalLiabilities"]);
+      initialEquity = double.parse(balanceSheet[i + 1]["totalAssets"])
+                    - double.parse(balanceSheet[i + 1]["totalLiabilities"]);
+      equityGrowthRate.add(double.parse(((currentEquity - initialEquity) / initialEquity * 100).toStringAsFixed(2)));
+    }
+    return equityGrowthRate;
   }
 
-  double getCashFlow() {
-    double currentCashFlow = double.parse(data.cashFlow["annualEarnings"][0]["operatingCashflow"]);
-    double initialCashFlow = double.parse(data.cashFlow["annualEarnings"][1]["operatingCashflow"]);
-    double cashFlow = (currentCashFlow - initialCashFlow) / initialCashFlow * 100;
-    return cashFlow;
+
+  List<double> getFCFRate() {
+    List<double> fCFRate = [];
+    double currentFreeCashFlow;
+    double initialFreeCashFlow;
+    int count = 9;
+    for (int i = 0; i < count; i++) {
+      currentFreeCashFlow = double.parse(cashFlow[i]["operatingCashflow"])
+                          - double.parse(cashFlow[i]["capitalExpenditures"]);
+      initialFreeCashFlow = double.parse(cashFlow[i + 1]["operatingCashflow"])
+                          - double.parse(cashFlow[i + 1]["capitalExpenditures"]);
+      fCFRate.add(double.parse(((currentFreeCashFlow - initialFreeCashFlow) / initialFreeCashFlow * 100).toStringAsFixed(2)));
+    }
+    return fCFRate;
   }
-*/
+
 
   @override
   Widget build(BuildContext context) {
     print('stage - 3');
-    return Result(earnings: getTrailingEps(), roic: getListOfRoic(),);
+    return Result(
+      roic: getListOfRoic(),
+      salesGrowthRate: getSaleGrowthRate(),
+      epsGrowthRate: getEpsGrowthRate(),
+      equityGrowthRate: getEquityGrowthRate(),
+      freeCashFlowRate: getFCFRate(),
+    );
   }
 }

@@ -2,9 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:simple_investment/theme.dart';
 
 class Result extends StatefulWidget {
-  const Result({required this.earnings, required this.roic, super.key});
-  final double earnings;
-  final List<num> roic;
+  const Result({
+    required this.roic,
+    required this.salesGrowthRate,
+    required this.epsGrowthRate,
+    required this.equityGrowthRate,
+    required this.freeCashFlowRate,
+    super.key
+  });
+  final List<double> roic;
+  final List<double> salesGrowthRate;
+  final List<double> epsGrowthRate;
+  final List<double> equityGrowthRate;
+  final List<double> freeCashFlowRate;
 
   @override
   State<Result> createState() => _ResultState();
@@ -16,7 +26,8 @@ class _ResultState extends State<Result> {
     print('stage - 4');
     return Container(
       color: AppColors.secondaryColor,
-      child: Text('${widget.roic}'),
+      child: Text(
+        '${widget.roic}\n${widget.salesGrowthRate}\n${widget.epsGrowthRate}\n${widget.equityGrowthRate}\n${widget.freeCashFlowRate}'),
     );
   }
 }
