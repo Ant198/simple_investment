@@ -171,6 +171,128 @@ class StickerPrice extends StatelessWidget {
     return treasureStok;
   }
 
+  //Analyze Income Statement
+
+  List<bool> getGrossMargin() {
+    List<bool> grossMargin = [];
+    double grossProfit;
+    double revenue;
+    int count = 9;
+    for (int i = 0; i < count; i++) {
+      grossProfit = double.parse(incomeStatement[i]["grossProfit"]);
+      revenue = double.parse(incomeStatement[i]["totalRevenue"]);
+      if (grossProfit / revenue > 0.4) {
+        grossMargin.add(true);
+      } else {
+        grossMargin.add(false);
+      }
+    }
+    return grossMargin;
+  }
+
+  List<bool> getSgaMargin() {
+    List<bool> sgaMargin = [];
+    double grossProfit;
+    double sga;
+    int count = 9;
+    for (int i = 0; i < count; i++) {
+      grossProfit = double.parse(incomeStatement[i]["grossProfit"]);
+      sga = double.parse(incomeStatement[i]["sellingGeneralAndAdministrative"]);
+      if (sga / grossProfit < 0.3) {
+        sgaMargin.add(true);
+      } else {
+        sgaMargin.add(false);
+      }
+    }
+    return sgaMargin;
+  }
+
+  List<bool> getResearchAndDev() {
+    List<bool> researchAndDevMargin = [];
+    double grossProfit;
+    double researchAndDev;
+    int count = 9;
+    for (int i = 0; i < count; i++) {
+      grossProfit = double.parse(incomeStatement[i]["grossProfit"]);
+      researchAndDev = double.parse(incomeStatement[i]["researchAndDevelopment"]);
+      if (researchAndDev / grossProfit < 0.6) {
+        researchAndDevMargin.add(true);
+      } else {
+        researchAndDevMargin.add(false);
+      }
+    }
+    return researchAndDevMargin;
+  }
+   
+  List<bool> getInterestMargin() {
+    List<bool> interestMargin = [];
+    double interestExpense;
+    double operatingIncome;
+    int count = 9;
+    for (int i = 0; i < count; i++) {
+      interestExpense = double.parse(incomeStatement[i]["interstExpanse"]);
+      operatingIncome = double.parse(incomeStatement[i]["operatingIncome"]);
+      if (interestExpense / operatingIncome < 0.15) {
+        interestMargin.add(true);
+      } else {
+        interestMargin.add(false);
+      }
+    }
+    return interestMargin;
+  }
+
+  List<bool> getIncomeTaxMargin() {
+    List<bool> incomeTaxMargin = [];
+    double incomeTax;
+    double preTaxIncome;
+    int count = 9;
+    for (int i = 0; i < count; i++) {
+      incomeTax = double.parse(incomeStatement[i]["incomeTaxExpense"]);
+      preTaxIncome = double.parse(incomeStatement[i]["incomeBeforeTax"]);
+      if (incomeTax / preTaxIncome < 0.25 && incomeTax / preTaxIncome > 0.15) {
+        incomeTaxMargin.add(true);
+      } else {
+        incomeTaxMargin.add(false);
+      }
+    }
+    return incomeTaxMargin;
+  }
+
+  List<bool> checkProfitMargin() {
+    List<bool> profitMargin = [];
+    double netIncome;
+    double revenue;
+    int count = 9;
+    for (int i = 0; i < count; i++) {
+      netIncome = double.parse(incomeStatement[i]["netIncome"]);
+      revenue = double.parse(incomeStatement[i]["incomeBeforeTax"]);
+      if (netIncome / revenue > 0.2) {
+        profitMargin.add(true);
+      } else {
+        profitMargin.add(false);
+      }
+    }
+    return profitMargin;
+  }
+
+  List<bool> chackCapexMargin() {
+    List<bool> capexMargin = [];
+    double netIncome;
+    double capex;
+    int count = 9;
+    for (int i = 0; i < count; i++) {
+      netIncome = double.parse(incomeStatement[i]["netIncome"]);
+      capex = double.parse(cashFlow[i]["capitalExpenditures"]);
+      if (capex / netIncome < 0.25) {
+        capexMargin.add(true);
+      } else {
+        capexMargin.add(false);
+      }
+    }
+    return capexMargin;
+  }
+
+
   @override
   Widget build(BuildContext context) {
     print('stage - 3');
