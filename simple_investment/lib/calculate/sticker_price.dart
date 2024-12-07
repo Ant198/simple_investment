@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:simple_investment/widgets/result.dart';
 
 class StickerPrice extends StatelessWidget {
@@ -16,6 +17,7 @@ class StickerPrice extends StatelessWidget {
   final List<dynamic> epsAnnual;
   final List<dynamic> epsQuart;
 
+  //Find growth rate
 
   double getTrailingEps() {
     double fourthQuart = double.parse(epsQuart[0]['reportedEPS']);
@@ -23,8 +25,6 @@ class StickerPrice extends StatelessWidget {
     double secondQuart = double.parse(epsQuart[2]['reportedEPS']);
     double firstQuart = double.parse(epsQuart[3]['reportedEPS']);
     double res = firstQuart + secondQuart + thirdQuart + fourthQuart;
-
-    print('$res + $firstQuart + $secondQuart + $thirdQuart + $fourthQuart');
     return res;
   }
 
@@ -88,7 +88,6 @@ class StickerPrice extends StatelessWidget {
     return equityGrowthRate;
   }
 
-
   List<double> getFCFRate() {
     List<double> fCFRate = [];
     double currentFreeCashFlow;
@@ -104,6 +103,73 @@ class StickerPrice extends StatelessWidget {
     return fCFRate;
   }
 
+// Analyze Balance Sheet
+
+  List<bool> checkCashVDebt() {
+    List<bool> cashVDebt = [];
+    int cashAndCashEquivalents;
+    int longTermDebt;
+    int shortTermDebt;
+    int count = 9;
+    for (int i = 0; i < count; i++) {
+      cashAndCashEquivalents = int.parse(balanceSheet[i]["cashAndCashEquivalentsAtCarryingValue"]);
+      longTermDebt = int.parse(balanceSheet[i]["longTermDebtNoncurrent"]);
+      shortTermDebt = int.parse(balanceSheet[i]["shortTermDebt"]);
+      if ( cashAndCashEquivalents > longTermDebt + shortTermDebt) {
+        cashVDebt.add(true);
+      } else {
+        cashVDebt.add(false);
+      }
+    }
+    return cashVDebt;
+  }
+
+  List<bool> checkDebtToEquity() {
+    List<bool> debtToEquity = [];
+    double totalLiabilities;
+    double shareHodlersEquity;
+    int count = 9;
+    for (var i = 0; i < count; i++) {
+      totalLiabilities = double.parse(balanceSheet[i]["totalLiabilities"]);
+      shareHodlersEquity = double.parse(balanceSheet[i]["totalShareholderEquity"]) + double.parse(balanceSheet[i]["treasuryStock"]);
+      if (totalLiabilities / shareHodlersEquity < 0.8) {
+        debtToEquity.add(true);
+      } else {
+        debtToEquity.add(false);
+      }
+    }
+    return debtToEquity;
+  }
+
+  List<bool> checkRetainedEarnings() {
+    List<bool> retainedEarnings = [];
+    double currentRetainedEarnings;
+    double prevRetinedEarnings;
+    int count = 8;
+    for (int i = 0; i < count; i++) {
+      currentRetainedEarnings = double.parse(balanceSheet[i]["retainedEarnings"]);
+      prevRetinedEarnings = double.parse(balanceSheet[i + 1]["retainedEarnings"]);
+      if (currentRetainedEarnings / prevRetinedEarnings > 1) {
+        retainedEarnings.add(true);
+      } else {
+        retainedEarnings.add(false);
+      }
+    }
+    return retainedEarnings;
+  }
+
+  List<bool> checkTreasureStock(){
+    List<bool> treasureStok = [];
+    int count = 9;
+    for (var i = 0; i < count; i++) {
+      if (balanceSheet[i]["treasuryStock"] != 0) {
+        treasureStok.add(true);
+      } else {
+        treasureStok.add(false);
+      }
+    }
+    return treasureStok;
+  }
 
   @override
   Widget build(BuildContext context) {
