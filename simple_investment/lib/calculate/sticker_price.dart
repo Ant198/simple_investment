@@ -52,6 +52,37 @@ class StickerPrice extends StatelessWidget {
     return roicInfo;
   }
 
+  Map<String, dynamic> epsGrowthRate() {
+    Map<String, dynamic> growthRateInfo = {};
+    List<double> listGrowthRate = [];
+    bool checkGrowthRate = true;
+    int count = 9;
+    double current;
+    double initial;
+    double growthRate;
+    double fiveYearGrowthRate;
+    double tenYearGrowthRate;
+    for (int i = 1; i <= count; i++) {
+        current = double.parse((double.parse(incomeStatement[i]["netIncome"]) 
+                / double.parse(balanceSheet[i]["commonStockSharesOutstanding"])).toStringAsFixed(2));
+        initial = double.parse((double.parse(incomeStatement[i + 1]["netIncome"]) 
+                / double.parse(balanceSheet[i + 1]["commonStockSharesOutstanding"])).toStringAsFixed(2));
+      growthRate = double.parse(((current - initial) / initial * 100).toStringAsFixed(2));
+      listGrowthRate.add(growthRate);
+    }
+    growthRate = listGrowthRate[0];
+    fiveYearGrowthRate = double.parse(((listGrowthRate[0] + listGrowthRate[1] + listGrowthRate[2] + listGrowthRate[3] + listGrowthRate[4]) / 5).toStringAsFixed(2));
+    tenYearGrowthRate = double.parse((listGrowthRate.reduce((a, b) => a + b) / count).toStringAsFixed(2));
+    if (growthRate < 10 || fiveYearGrowthRate < 10 || tenYearGrowthRate < 10) {
+      checkGrowthRate = false;
+    }
+    growthRateInfo["currentGrowthRate"] = growthRate;
+    growthRateInfo["fiveYearGrowthYear"] = fiveYearGrowthRate;
+    growthRateInfo["tenYearGrowthRate"] = tenYearGrowthRate;
+    growthRateInfo["checkGrowthRate"] = checkGrowthRate;
+    return growthRateInfo;
+  }
+
   Map<String, dynamic> growthRateInfo(List<dynamic> data, String key, String key2) {
     Map<String, dynamic> growthRateInfo = {};
     List<double> listGrowthRate = [];
@@ -62,7 +93,7 @@ class StickerPrice extends StatelessWidget {
     double growthRate;
     double fiveYearGrowthRate;
     double tenYearGrowthRate;
-    for (int i = 0; i < count; i++) {
+    for (int i = 1; i <= count; i++) {
       if (key2 != '') {
         current = double.parse(data[i][key]) - double.parse(data[i][key2]);
         initial = double.parse(data[i + 1][key]) - double.parse(data[i + 1][key2]);
@@ -289,8 +320,8 @@ class StickerPrice extends StatelessWidget {
   Map<String, dynamic> getCheckedData() {
     Map<String, dynamic> dataVerification = {};
     dataVerification["getRoicInfo"] = getRoicInfo();
+    dataVerification["epsGrowthRate"] = epsGrowthRate();
     dataVerification["saleGrowthRate"] = growthRateInfo(incomeStatement, "totalRevenue", '');
-    dataVerification["epsGrowthRate"] = growthRateInfo(epsAnnual, "reportedEPS", '');
     dataVerification["equityGrowthRate"] = growthRateInfo(balanceSheet, "totalShareholderEquity", '');
     dataVerification["freeCashGrowthRate"] = growthRateInfo(cashFlow, "operatingCashflow", "capitalExpenditures");
     dataVerification["cashVDebt"] = checkCashVDebt();
