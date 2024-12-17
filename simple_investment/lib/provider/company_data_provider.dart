@@ -28,7 +28,32 @@ class CompanyDataProvider extends ChangeNotifier {
       http.get(Uri.parse(urlCashFlow)),
     ]);
 
-    for (var response in responses) {
+    if(responses[0].statusCode == 200) {
+      _ePSStore = convert.jsonDecode(responses[0].body);
+      notifyListeners();
+    } else {
+      print('error');
+    }
+    if(responses[1].statusCode == 200) {
+      _incomeStatement = convert.jsonDecode(responses[1].body);
+      notifyListeners();
+    } else {
+      print('error');
+    }
+    if(responses[2].statusCode == 200) {
+      _balanceSheet = convert.jsonDecode(responses[2].body);
+      notifyListeners();
+    } else {
+      print('error');
+    }
+    if(responses[3].statusCode == 200) {
+      _cashFlow = convert.jsonDecode(responses[3].body);
+      notifyListeners();
+    } else {
+      print('error');
+    }
+
+    /*for (var response in responses) {
       if(response.statusCode == 200) {
         if(_ePSStore.isEmpty) {
           _ePSStore = convert.jsonDecode(response.body);
@@ -51,6 +76,7 @@ class CompanyDataProvider extends ChangeNotifier {
       }
     }
   }
+  */
 
 /*
   Future<void> fetchEarnings(String ticker) async {
@@ -102,8 +128,5 @@ class CompanyDataProvider extends ChangeNotifier {
   }
 
   */
-  
+  }
 }
-  /*
-   fcf = operatingCashFlow - caEx
-  */

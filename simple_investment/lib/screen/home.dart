@@ -83,6 +83,7 @@ class _HomeState extends State<Home> {
                     return const Text('company');
                   } else {
                     print('stage - 5');
+                    print('$item');
                     print('INCOME STATEMENT - ${item.incomeStatement["annualReports"]}');
                     print('BALANCE SHEET - ${item.balanceSheet["annualReports"]}');
                     print('CASH FLOW - ${item.cashFlow["annualReports"]}');
