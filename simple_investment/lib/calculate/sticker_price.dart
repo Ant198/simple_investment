@@ -46,8 +46,9 @@ class StickerPrice extends StatelessWidget {
         checkRoic = false;
       }
     }
-    roicInfo['currentRoic'] = listOfRoic[0];
-    roicInfo['roicRate'] = (listOfRoic.reduce((value, element) => value + element) / years).toStringAsFixed(2);
+    roicInfo['currentRoicRate'] = listOfRoic[0];
+    roicInfo['fiveYearRoicRate'] = (listOfRoic[0] + listOfRoic[1] + listOfRoic[2] + listOfRoic[3] + listOfRoic[4]) / 5;
+    roicInfo['tenYearRoicRate'] = (listOfRoic.reduce((value, element) => value + element) / years ).toStringAsFixed(2);
     roicInfo['checkRoic'] = checkRoic;
     return roicInfo;
   }
@@ -62,7 +63,7 @@ class StickerPrice extends StatelessWidget {
     double growthRate;
     double fiveYearGrowthRate;
     double tenYearGrowthRate;
-    for (int i = 1; i <= count; i++) {
+    for (int i = 0; i <= count; i++) {
         current = double.parse((double.parse(incomeStatement[i]["netIncome"]) 
                 / double.parse(balanceSheet[i]["commonStockSharesOutstanding"])).toStringAsFixed(2));
         initial = double.parse((double.parse(incomeStatement[i + 1]["netIncome"]) 
@@ -93,7 +94,7 @@ class StickerPrice extends StatelessWidget {
     double growthRate;
     double fiveYearGrowthRate;
     double tenYearGrowthRate;
-    for (int i = 1; i <= count; i++) {
+    for (int i = 0; i <= count; i++) {
       if (key2 != '') {
         current = double.parse(data[i][key]) - double.parse(data[i][key2]);
         initial = double.parse(data[i + 1][key]) - double.parse(data[i + 1][key2]);
@@ -119,202 +120,160 @@ class StickerPrice extends StatelessWidget {
 
 // Analyze Balance Sheet
 
-  bool checkCashVDebt() {
-    bool cashVDebt = true;
+  Map<String, dynamic> cashVDebtInfo() {
+    Map<String, dynamic> cashVDebtInfo = {};
     int cashAndCashEquivalents;
     int longTermDebt;
     int shortTermDebt;
-    int count = 9;
-    for (int i = 0; i < count; i++) {
-      cashAndCashEquivalents = int.parse(balanceSheet[i]["cashAndCashEquivalentsAtCarryingValue"]);
-      longTermDebt = int.parse(balanceSheet[i]["longTermDebtNoncurrent"]);
-      shortTermDebt = int.parse(balanceSheet[i]["shortTermDebt"]);
-      if ( cashAndCashEquivalents > longTermDebt + shortTermDebt) {
-        cashVDebt = true;
-      } else {
-        cashVDebt = false;
-        break;
-      }
+    if (balanceSheet[0]["cashAndCashEquivalentsAtCarryingValue"] == 'None' 
+        || balanceSheet[0]["longTermDebtNoncurrent"] == 'None'
+        || balanceSheet[0]["shortTermDebt"] == 'None') {
+      cashVDebtInfo['checkCashVDebt'] = 'None';
+    } else {
+      cashAndCashEquivalents = int.parse(balanceSheet[0]["cashAndCashEquivalentsAtCarryingValue"]);
+      longTermDebt = int.parse(balanceSheet[0]["longTermDebtNoncurrent"]);
+      shortTermDebt = int.parse(balanceSheet[0]["shortTermDebt"]);
+      cashVDebtInfo['checkCashVDebt'] = cashAndCashEquivalents < longTermDebt + shortTermDebt ? false : true;
     }
-    return cashVDebt;
+    return cashVDebtInfo;
   }
 
-  bool checkDebtToEquity() {
-    bool debtToEquity = true;
+  Map<String, dynamic> debtToEquityInfo() {
+    Map<String, dynamic> debtToEquityInfo = {};
     double totalLiabilities;
     double shareHodlersEquity;
-    int count = 9;
-    for (var i = 0; i < count; i++) {
-      totalLiabilities = double.parse(balanceSheet[i]["totalLiabilities"]);
-      shareHodlersEquity = double.parse(balanceSheet[i]["totalShareholderEquity"]);
-      if (totalLiabilities / shareHodlersEquity < 0.8) {
-        debtToEquity = true;
-      } else {
-        debtToEquity = false;
-        break;
-      }
+    if (balanceSheet[0]["totalLiabilities"] == 'None' || balanceSheet[0]["totalShareholderEquity"] == 'None') {
+      debtToEquityInfo["checkDebtToEquity"] = 'None';
+    } else {
+      totalLiabilities = double.parse(balanceSheet[0]["totalLiabilities"]);
+      shareHodlersEquity = double.parse(balanceSheet[0]["totalShareholderEquity"]);
+      debtToEquityInfo["checkDebtToEquity"] = totalLiabilities / shareHodlersEquity > 0.8 ? false : true;
     }
-    return debtToEquity;
+    return debtToEquityInfo;
   }
 
-  bool checkRetainedEarnings() {
-    bool retainedEarnings = true;
+  Map<String, dynamic> retainedEarningsInfo() {
+    Map<String, dynamic> retainedEarnings = {};
     double currentRetainedEarnings;
     double prevRetinedEarnings;
-    int count = 8;
-    for (int i = 0; i < count; i++) {
-      currentRetainedEarnings = double.parse(balanceSheet[i]["retainedEarnings"]);
-      prevRetinedEarnings = double.parse(balanceSheet[i + 1]["retainedEarnings"]);
-      if (currentRetainedEarnings / prevRetinedEarnings > 1) {
-        retainedEarnings = true;
-      } else {
-        retainedEarnings = false;
-        break;
-      }
+    if (balanceSheet[0]["retainedEarnings"] == 'None' || balanceSheet[1]["retainedEarnings"] == 'None') {
+      retainedEarnings["checkRetainedEarnings"] = 'None';
+    } else {
+      currentRetainedEarnings = double.parse(balanceSheet[0]["retainedEarnings"]);
+      prevRetinedEarnings = double.parse(balanceSheet[1]["retainedEarnings"]);
+      retainedEarnings["checkRetainedEarnings"] = currentRetainedEarnings / prevRetinedEarnings < 1 ? false : true;
     }
     return retainedEarnings;
   }
 
-  bool checkTreasureStock(){
-    bool treasureStok = true;
-    int count = 9;
-    for (var i = 0; i < count; i++) {
-      if (balanceSheet[i]["treasuryStock"] != 0) {
-        treasureStok = true;
-      } else {
-        treasureStok = false;
-        break;
-      }
+  Map<String, dynamic> treasuryStockInfo(){
+    Map<String, dynamic> treasuryStockInfo = {};
+    if (balanceSheet[0]["treasuryStock"] == 0) {
+      treasuryStockInfo["checkTreasuryStock"] = false;
+    } else if(balanceSheet[0]["treasuryStock"] != 0) {
+      treasuryStockInfo["checkTreasuryStock"] = true;
+    } else {
+      treasuryStockInfo["checkTreasuryStock"] = balanceSheet[0]["treasuryStock"];
     }
-    return treasureStok;
+    return treasuryStockInfo;
   }
 
   //Analyze Income Statement
 
-  bool checkGrossMargin() {
-    bool grossMargin = true;
+  Map<String, dynamic> grossMarginInfo() {
+    Map<String, dynamic> grossMarginInfo = {};
     double grossProfit;
     double revenue;
-    int count = 9;
-    for (int i = 0; i < count; i++) {
-      grossProfit = double.parse(incomeStatement[i]["grossProfit"]);
-      revenue = double.parse(incomeStatement[i]["totalRevenue"]);
-      if (grossProfit / revenue > 0.4) {
-        grossMargin = true;
-      } else {
-        grossMargin = false;
-        break;
-      }
+    if (incomeStatement[0]["grossProfit"] == 'None' || incomeStatement[0]["totalRevenue"] == 'None') {
+      grossMarginInfo["checkGrossMargin"] = 'None';
+    } else {
+      grossProfit = double.parse(incomeStatement[0]["grossProfit"]);
+      revenue = double.parse(incomeStatement[0]["totalRevenue"]);
+      grossMarginInfo["checkGrossMargin"] = grossProfit / revenue < 0.4 ? false : true;
     }
-    return grossMargin;
+    return grossMarginInfo;
   }
 
-  bool checkSgaMargin() {
-    bool sgaMargin = true;
+  Map<String, dynamic> sgaMarginInfo() {
+    Map<String, dynamic> sgaMarginInfo = {};
     double grossProfit;
     double sga;
-    int count = 9;
-    for (int i = 0; i < count; i++) {
-      grossProfit = double.parse(incomeStatement[i]["grossProfit"]);
-      sga = double.parse(incomeStatement[i]["sellingGeneralAndAdministrative"]);
-      if (sga / grossProfit < 0.3) {
-        sgaMargin = true;
-      } else {
-        sgaMargin = false;
-        break;
-      }
+    if (incomeStatement[0]["grossProfit"] == 'None' || incomeStatement[0]["sellingGeneralAndAdministrative"] == 'None') {
+      sgaMarginInfo["checkSgaMargin"] = 'None';
+    } else {
+      grossProfit = double.parse(incomeStatement[0]["grossProfit"]);
+      sga = double.parse(incomeStatement[0]["sellingGeneralAndAdministrative"]);
+      sgaMarginInfo["checkSgaMargin"] = sga / grossProfit > 0.3 ? false : true;
     }
-    return sgaMargin;
+    return sgaMarginInfo;
   }
 
-  bool checkResearchAndDev() {
-    bool researchAndDevMargin = true;
+  Map<String, dynamic> researchAndDevMarginInfo() {
+    Map<String, dynamic> marginInfo = {};
     double grossProfit;
     double researchAndDev;
-    int count = 9;
-    for (int i = 0; i < count; i++) {
-      grossProfit = double.parse(incomeStatement[i]["grossProfit"]);
-      researchAndDev = double.parse(incomeStatement[i]["researchAndDevelopment"]);
-      if (researchAndDev / grossProfit < 0.6) {
-        researchAndDevMargin = true;
-      } else {
-        researchAndDevMargin = false;
-        break;
-      }
+    if (incomeStatement[0]["grossProfit"] == 'None' || incomeStatement[0]["researchAndDevelopment"] == 'None') {
+      marginInfo["checkResearchAndDevMargin"] == 'None';
+    } else {
+      grossProfit = double.parse(incomeStatement[0]["grossProfit"]);
+      researchAndDev = double.parse(incomeStatement[0]["researchAndDevelopment"]);
+      marginInfo["checkResearchAndDevMargin"] = researchAndDev / grossProfit > 0.6 ? false : true;
     }
-    return researchAndDevMargin;
+    return marginInfo;
   }
    
-  bool checkInterestMargin() {
-    bool interestMargin = true;
+  Map<String, dynamic> interestMarginInfo() {
+    Map<String, dynamic> marginInfo = {};
     double interestExpense;
     double operatingIncome;
-    int count = 9;
-    for (int i = 0; i < count; i++) {
-      interestExpense = double.parse(incomeStatement[i]["interestExpense"] == 'None' ? '0' : incomeStatement[i]["interestExpense"]);
-      operatingIncome = double.parse(incomeStatement[i]["operatingIncome"] == 'None' ? '0' : incomeStatement[i]["operatingIncome"]);
-      if (interestExpense / operatingIncome < 0.15) {
-        interestMargin = true;
-      } else {
-        interestMargin = false;
-        break;
-      }
+    if (incomeStatement[0]["interestExpense"] == 'None' || incomeStatement[0]["operatingIncome"] == 'None') {
+      marginInfo["checkMargin"] = 'None';
+    } else {
+      interestExpense = double.parse(incomeStatement[0]["interestExpense"]);
+      operatingIncome = double.parse(incomeStatement[0]["operatingIncome"]);
+      marginInfo["checkMargin"] = interestExpense / operatingIncome > 0.15 ? false : true; 
     }
-    return interestMargin;
+    return marginInfo;
   }
 
-  bool checkIncomeTaxMargin() {
-    bool incomeTaxMargin = true;
-    double incomeTax;
-    double preTaxIncome;
-    int count = 9;
-    for (int i = 0; i < count; i++) {
-      incomeTax = double.parse(incomeStatement[i]["incomeTaxExpense"]);
-      preTaxIncome = double.parse(incomeStatement[i]["incomeBeforeTax"]);
-      if (incomeTax / preTaxIncome < 0.25 && incomeTax / preTaxIncome > 0.15) {
-        incomeTaxMargin = true;
-      } else {
-        incomeTaxMargin = false;
-        break;
-      }
+  Map<String, dynamic> incomeTaxMarginInfo() {
+    Map<String, dynamic> marginInfo = {};
+    if (incomeStatement[0]["incomeTaxExpense"] == 'None' || incomeStatement[0]["incomeBeforeTax"] == 'None') {
+      marginInfo["checkMargin"] = 'None';
+    } else {
+      double incomeTax = double.parse(incomeStatement[0]["incomeTaxExpense"]);
+      double preTaxIncome = double.parse(incomeStatement[0]["incomeBeforeTax"]);
+      marginInfo["checkMargin"] = incomeTax / preTaxIncome > 0.25 ? false : true;
     }
-    return incomeTaxMargin;
+    return marginInfo;
   }
 
-  bool checkProfitMargin() {
-    bool profitMargin = true;
+  Map<String, dynamic> netIncomeMarginInfo() {
+    Map<String, dynamic> marginInfo = {};
     double netIncome;
     double revenue;
-    int count = 9;
-    for (int i = 0; i < count; i++) {
-      netIncome = double.parse(incomeStatement[i]["netIncome"]);
-      revenue = double.parse(incomeStatement[i]["incomeBeforeTax"]);
-      if (netIncome / revenue > 0.2) {
-        profitMargin = true;
-      } else {
-        profitMargin = false;
-        break;
-      }
+    if (incomeStatement[0]["netIncome"] == 'None' || incomeStatement[0]["totalRevenue"] == 'None') {
+      marginInfo["checkMargin"] = 'None';
+    } else {
+      netIncome = double.parse(incomeStatement[0]["netIncome"]);
+      revenue = double.parse(incomeStatement[0]["totalRevenue"]);
+      marginInfo["checkMargin"] = netIncome / revenue < 0.2 ? false : true; 
     }
-    return profitMargin;
+    return marginInfo;
   }
 
-  bool checkCapexMargin() {
-    bool capexMargin = true;
+  Map<String, dynamic> capexMarginInfo() {
+    Map<String, dynamic> marginInfo = {};
     double netIncome;
     double capex;
-    int count = 9;
-    for (int i = 0; i < count; i++) {
-      netIncome = double.parse(incomeStatement[i]["netIncome"]);
-      capex = double.parse(cashFlow[i]["capitalExpenditures"]);
-      if (capex / netIncome < 0.25) {
-        capexMargin = true;
-      } else {
-        capexMargin = false;
-        break;
-      }
+    if (incomeStatement[0]["netIncome"] == 'None' || cashFlow[0]["capitalExpenditures"] == 'None') {
+      marginInfo["checkMargin"] = 'None';
+    } else {
+      netIncome = double.parse(incomeStatement[0]["netIncome"]);
+      capex = double.parse(cashFlow[0]["capitalExpenditures"]);
+      marginInfo["checkMargin"] = capex / netIncome > 0.25 ? false : true; 
     }
-    return capexMargin;
+    return marginInfo;
   }
 
   Map<String, dynamic> getCheckedData() {
@@ -324,23 +283,23 @@ class StickerPrice extends StatelessWidget {
     dataVerification["saleGrowthRate"] = growthRateInfo(incomeStatement, "totalRevenue", '');
     dataVerification["equityGrowthRate"] = growthRateInfo(balanceSheet, "totalShareholderEquity", '');
     dataVerification["freeCashGrowthRate"] = growthRateInfo(cashFlow, "operatingCashflow", "capitalExpenditures");
-    dataVerification["cashVDebt"] = checkCashVDebt();
-    dataVerification["debtToEquity"] = checkDebtToEquity();
-    dataVerification["retainedEarnings"] = checkRetainedEarnings();
-    dataVerification["treasureStok"] = checkTreasureStock();
-    dataVerification["grossMargin"] = checkGrossMargin();
-    dataVerification["sgaMargin"] = checkSgaMargin();
-    dataVerification["researchAndDevMargin"] = checkResearchAndDev();
-    dataVerification["interestMargin"] = checkInterestMargin();
-    dataVerification["incomeTaxMargin"] = checkIncomeTaxMargin();
-    dataVerification["profitMargin"] = checkProfitMargin();
-    dataVerification["capexMargin"] = checkCapexMargin();
+    dataVerification["cashVDebt"] = cashVDebtInfo();
+    dataVerification["debtToEquity"] = debtToEquityInfo();
+    dataVerification["retainedEarnings"] = retainedEarningsInfo();
+    dataVerification["treasuryStock"] = treasuryStockInfo();
+    dataVerification["grossMargin"] = grossMarginInfo();
+    dataVerification["sgaMargin"] = sgaMarginInfo();
+    dataVerification["r&DMargin"] = researchAndDevMarginInfo();
+    dataVerification["interestMargin"] = interestMarginInfo();
+    dataVerification["incomeTaxMargin"] = incomeTaxMarginInfo();
+    dataVerification["netIncomeMargin"] = netIncomeMarginInfo();
+    dataVerification["capexMargin"] = capexMarginInfo();
     return dataVerification;
   }
 
   @override
   Widget build(BuildContext context) {
-    print('stage - 3');
+
     return Result(
       checkData: getCheckedData(),
     );
