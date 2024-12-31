@@ -276,6 +276,26 @@ class StickerPrice extends StatelessWidget {
     return marginInfo;
   }
 
+  double getIntrinsicValue() {
+    double currentCashFlow = double.parse(cashFlow[0]["operatingCashflow"]) - double.parse(cashFlow[0]["capitalExpenditures"]);
+    late double estimateCashFlow;
+    double estimateGrowthRatio = growthRateInfo(cashFlow, "operatingCashflow", "capitalExpenditures")["tenYearGrowthRate"] / 100;
+    double discountRatio = 0.1;
+    int peRatio = 20;
+    double terminalValue = 0;
+    double intrinsicValue = 0;
+    double numberOfShare = double.parse(balanceSheet[0]["commonStockSharesOutstanding"]);
+    if (estimateGrowthRatio > 15) {
+      estimateGrowthRatio = 15;
+    }
+    for (int i = 0; i < 10; i++) {
+      estimateCashFlow = currentCashFlow * (1 + estimateGrowthRatio);
+      terminalValue += estimateCashFlow / (1 + discountRatio);
+    }
+    intrinsicValue = estimateCashFlow * peRatio + terminalValue;
+    return intrinsicValue / numberOfShare;
+  }
+
   Map<String, dynamic> getCheckedData() {
     Map<String, dynamic> dataVerification = {};
     dataVerification["getRoicInfo"] = getRoicInfo();
@@ -302,6 +322,7 @@ class StickerPrice extends StatelessWidget {
 
     return Result(
       checkData: getCheckedData(),
+      intrinsicValue: getIntrinsicValue(),
     );
   }
 }
