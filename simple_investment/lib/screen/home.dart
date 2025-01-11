@@ -5,8 +5,9 @@ import 'package:simple_investment/provider/company_data_provider.dart';
 //import 'package:simple_investment/servises/fetchdata.dart';
 //import 'package:simple_investment/widgets/list_companies.dart';
 //import 'package:simple_investment/widgets/list_companies.dart';
-import 'package:simple_investment/widgets/search_field.dart';
+//import 'package:simple_investment/widgets/search_field.dart';
 import 'package:simple_investment/share/styled_text.dart';
+import 'package:simple_investment/widgets/search_bar.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -16,31 +17,16 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  final _keyForm = GlobalKey<FormState>();
   final _searchCompany = TextEditingController();
   final String text = 'example';
-
   @override
   void dispose() {
     _searchCompany.dispose();
+    super.dispose();
   }
-  void handleSubmit(saveData) async {
-    if (_keyForm.currentState!.validate()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: StyledText(text: 'Processing Data'))
-      );
-    }
-    print('start');
-    await saveData.fetchCompanyData(_searchCompany.text);
-    if(!mounted) return;
-    Navigator.pushNamed(context, '/result');
-  }
-
   @override
   void initState() {
-
     super.initState();
-    
   }
   @override
   Widget build(BuildContext context) {
@@ -50,27 +36,17 @@ class _HomeState extends State<Home> {
         title: const StyledTitle(text: 'Simple Investment',),
       ),
       body: SingleChildScrollView(
+        scrollDirection: Axis.vertical,
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 30),
           child: Column(
             children: [
-              Row(
-                children: [
-                  Expanded(
-                    flex: 4,
-                    child: Form(
-                      key: _keyForm,
-                      child: SearchField(nameController: _searchCompany, text: 'Search',)
-                    ),
-                  ),
-                  const SizedBox(width: 10,),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () async => handleSubmit(provider),
-                      child: const Text('search'),
-                     ),
-                  )
-                ],
+              Align(
+                child: SearchField(
+                  nameController: _searchCompany,
+                  text: 'Search',
+                  provider: provider
+                )
               ),
             ],
           )

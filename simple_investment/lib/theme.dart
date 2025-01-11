@@ -6,7 +6,7 @@ class AppColors {
   static Color secondaryColor = const Color.fromRGBO(34, 34, 34, 1);
   static Color titleColor = const Color.fromRGBO(210, 205, 216, 1);
   static Color secondaryTitleColor = const Color.fromRGBO(247, 247, 247, 1);
-  static Color textColor = const Color.fromRGBO(107, 104, 111, 1);
+  static Color textColor = const Color.fromRGBO(234, 224, 200, 1);
   static Color permitColor = const Color.fromRGBO(118, 200, 131, 1);
   static Color alertColor = const Color.fromRGBO(211, 75, 86, 1);
   static Color yellowColor = const Color.fromRGBO(252, 229, 102, 1);

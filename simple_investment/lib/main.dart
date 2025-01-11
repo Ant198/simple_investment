@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:simple_investment/provider/company_data_provider.dart';
 import 'package:simple_investment/screen/home.dart';
-import 'package:simple_investment/screen/resultt.dart';
 import 'package:simple_investment/theme.dart';
 
 void main() {
@@ -22,11 +21,7 @@ class MainApp extends StatelessWidget {
     return MaterialApp(
       title: 'Simple Investment',
       theme: primeTheme,
-      initialRoute: '/',
-      routes: {
-        '/': (BuildContext context) => const Home(),
-        '/result': (BuildContext context) => const Resultt(),
-      },
+      home: const Home(),
     );
   }
 }

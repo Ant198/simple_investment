@@ -1,5 +1,6 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:simple_investment/widgets/result.dart';
+import 'package:simple_investment/widgets/stock_info.dart';
 
 class StickerPrice extends StatelessWidget {
   const StickerPrice({
@@ -36,7 +37,7 @@ class StickerPrice extends StatelessWidget {
     for (int i = 0; i < years; i++) {
       double netIncome = double.parse(incomeStatement[i]["netIncome"]);
       double longTermDebt = double.parse(balanceSheet[i]["longTermDebtNoncurrent"] == 'None' ? '0' : balanceSheet[i]["longTermDebtNoncurrent"]);
-      double shortTermDebt = double.parse(balanceSheet[i]["shortTermDebt"]);
+      double shortTermDebt = double.parse(balanceSheet[i]["shortTermDebt"] == 'None' ? '0' : balanceSheet[i]["shortTermDebt"]);
       double totalDebt = longTermDebt + shortTermDebt;
       double equity = double.parse(balanceSheet[i]["totalShareholderEquity"]);
       roic = double.parse((netIncome / (totalDebt + equity) * 100).toStringAsFixed(2));
@@ -65,9 +66,9 @@ class StickerPrice extends StatelessWidget {
     double tenYearGrowthRate;
     for (int i = 0; i <= count; i++) {
         current = double.parse((double.parse(incomeStatement[i]["netIncome"]) 
-                / double.parse(balanceSheet[i]["commonStockSharesOutstanding"])).toStringAsFixed(2));
+                / double.parse(balanceSheet[0]["commonStockSharesOutstanding"])).toStringAsFixed(2));
         initial = double.parse((double.parse(incomeStatement[i + 1]["netIncome"]) 
-                / double.parse(balanceSheet[i + 1]["commonStockSharesOutstanding"])).toStringAsFixed(2));
+                / double.parse(balanceSheet[0]["commonStockSharesOutstanding"])).toStringAsFixed(2));
       growthRate = double.parse(((current - initial) / initial * 100).toStringAsFixed(2));
       listGrowthRate.add(growthRate);
     }
@@ -213,7 +214,7 @@ class StickerPrice extends StatelessWidget {
     double grossProfit;
     double researchAndDev;
     if (incomeStatement[0]["grossProfit"] == 'None' || incomeStatement[0]["researchAndDevelopment"] == 'None') {
-      marginInfo["checkResearchAndDevMargin"] == 'None';
+      marginInfo["checkResearchAndDevMargin"] = 'None';
     } else {
       grossProfit = double.parse(incomeStatement[0]["grossProfit"]);
       researchAndDev = double.parse(incomeStatement[0]["researchAndDevelopment"]);
@@ -277,23 +278,30 @@ class StickerPrice extends StatelessWidget {
   }
 
   double getIntrinsicValue() {
-    double currentCashFlow = double.parse(cashFlow[0]["operatingCashflow"]) - double.parse(cashFlow[0]["capitalExpenditures"]);
-    late double estimateCashFlow;
-    double estimateGrowthRatio = growthRateInfo(cashFlow, "operatingCashflow", "capitalExpenditures")["tenYearGrowthRate"] / 100;
-    double discountRatio = 0.1;
-    int peRatio = 20;
+    int cash = int.parse(balanceSheet[0]["cashAndCashEquivalentsAtCarryingValue"]);
+    int liabilities = int.parse(balanceSheet[0]["totalLiabilities"]);
+    double freeCashFlow = double.parse(cashFlow[0]["operatingCashflow"]) - double.parse(cashFlow[0]["capitalExpenditures"]);
+    double growthAssumption = growthRateInfo(cashFlow, "operatingCashflow", "capitalExpenditures")["tenYearGrowthRate"] / 100;
+    double? estimateCashFlow;
+    int netDebt;
+    double discountRate = 0.12;
+    double priceToFCF = 20;
     double terminalValue = 0;
     double intrinsicValue = 0;
-    double numberOfShare = double.parse(balanceSheet[0]["commonStockSharesOutstanding"]);
-    if (estimateGrowthRatio > 15) {
-      estimateGrowthRatio = 15;
+    double shareOutstanding = double.parse(balanceSheet[0]["commonStockSharesOutstanding"]);
+    double marginOfSafety = 0.3;
+    if (growthAssumption > 0.15) {
+      growthAssumption = 0.15;
     }
-    for (int i = 0; i < 10; i++) {
-      estimateCashFlow = currentCashFlow * (1 + estimateGrowthRatio);
-      terminalValue += estimateCashFlow / (1 + discountRatio);
+    for (int i = 1; i <= 10; i++) {
+      estimateCashFlow = freeCashFlow * pow((1 + growthAssumption), i);
+      terminalValue += estimateCashFlow / pow((1 + discountRate), i);
     }
-    intrinsicValue = estimateCashFlow * peRatio + terminalValue;
-    return intrinsicValue / numberOfShare;
+    intrinsicValue = (estimateCashFlow! * priceToFCF) / pow((1 + discountRate), 10) + terminalValue;
+    netDebt = cash - liabilities;
+    intrinsicValue = intrinsicValue + netDebt;
+    intrinsicValue = intrinsicValue * (1 - marginOfSafety);
+    return double.parse((intrinsicValue / shareOutstanding).toStringAsFixed(2));
   }
 
   Map<String, dynamic> getCheckedData() {
@@ -320,7 +328,7 @@ class StickerPrice extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-    return Result(
+    return StockInfo(
       checkData: getCheckedData(),
       intrinsicValue: getIntrinsicValue(),
     );
