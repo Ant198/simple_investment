@@ -1,11 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:simple_investment/provider/company_data_provider.dart';
-//import 'package:simple_investment/widgets/result.dart';
-//import 'package:simple_investment/servises/fetchdata.dart';
-//import 'package:simple_investment/widgets/list_companies.dart';
-//import 'package:simple_investment/widgets/list_companies.dart';
-//import 'package:simple_investment/widgets/search_field.dart';
 import 'package:simple_investment/share/styled_text.dart';
 import 'package:simple_investment/widgets/search_bar.dart';
 
